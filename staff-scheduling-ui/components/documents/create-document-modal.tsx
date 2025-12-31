@@ -165,21 +165,23 @@ export function CreateDocumentModal({
                 </div>
               </div>
               {!useManualUrl ? (
-                <UploadButton
-                  storeId={storeId}
-                  purpose="DOCUMENT"
-                  onUploaded={(url) => {
-                    setFileUrl(url)
-                    setError("")
-                  }}
-                  accept="application/pdf,image/*,.doc,.docx"
-                  label="Upload Document"
-                />
-                {fileUrl && (
-                  <p className="text-xs text-muted-foreground">
-                    File uploaded: <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">{fileUrl}</a>
-                  </p>
-                )}
+                <>
+                  <UploadButton
+                    storeId={storeId}
+                    purpose="DOCUMENT"
+                    onUploaded={(url) => {
+                      setFileUrl(url)
+                      setError("")
+                    }}
+                    accept="application/pdf,image/*,.doc,.docx"
+                    label="Upload Document"
+                  />
+                  {fileUrl && (
+                    <p className="text-xs text-muted-foreground">
+                      File uploaded: <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">{fileUrl}</a>
+                    </p>
+                  )}
+                </>
               ) : (
                 <Input
                   id="fileUrl"
