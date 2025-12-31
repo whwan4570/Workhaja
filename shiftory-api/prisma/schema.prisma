@@ -1,0 +1,400 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Role enum for membership-based access control
+enum Role {
+  OWNER
+  MANAGER
+  WORKER
+}
+
+// Month status enum for schedule months
+enum MonthStatus {
+  OPEN
+  DRAFTING
+  PUBLISHED
+}
+
+// Shift status enum
+enum ShiftStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// Change request type enum
+enum ChangeRequestType {
+  SHIFT_TIME_CHANGE
+  SHIFT_DROP_REQUEST
+  SHIFT_COVER_REQUEST
+  SHIFT_SWAP_REQUEST
+}
+
+// Change request status enum
+enum ChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+// Document type enum
+enum DocumentType {
+  CONTRACT
+  HEALTH_CERT
+  HYGIENE_TRAINING
+  POLICY
+  OTHER
+}
+
+// Submission status enum
+enum SubmissionStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// Notification type enum
+enum NotificationType {
+  DOC_EXPIRING_SOON
+  DOC_EXPIRED
+  AVAILABILITY_DEADLINE_SOON
+  SHIFT_REMINDER
+  CHANGE_REQUEST_CREATED
+  CHANGE_REQUEST_UPDATED
+  MONTH_PUBLISHED
+}
+
+// Notification status enum
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELED
+}
+
+// Notification channel enum
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  name         String
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  memberships            Membership[]
+  shifts                 Shift[]
+  availabilities         Availability[]
+  changeRequestsCreated  ChangeRequest[] @relation("CreatedBy")
+  changeRequestsReviewed ChangeRequest[] @relation("ReviewedBy")
+  candidates             ChangeRequestCandidate[]
+  auditLogs              AuditLog[]
+  documentsCreated       Document[] @relation("CreatedBy")
+  documentTargets        DocumentTarget[]
+  documentAcks           DocumentAck[]
+  documentSubmissions    DocumentSubmission[]
+  submissionsReviewed    DocumentSubmission[] @relation("ReviewedBy")
+  notifications          Notification[]
+
+  @@map("users")
+}
+
+model Store {
+  id        String       @id @default(cuid())
+  name      String
+  timezone  String       @default("America/New_York")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  // Labor rules
+  overtimeDailyEnabled  Boolean @default(false) @map("overtime_daily_enabled")
+  overtimeDailyMinutes  Int     @default(480) @map("overtime_daily_minutes")
+  overtimeWeeklyEnabled Boolean @default(true) @map("overtime_weekly_enabled")
+  overtimeWeeklyMinutes Int     @default(2400) @map("overtime_weekly_minutes")
+  breakPaid             Boolean @default(false) @map("break_paid")
+  weekStartsOn          Int     @default(1) @map("week_starts_on")
+
+  memberships     Membership[]
+  scheduleMonths  ScheduleMonth[]
+  shifts          Shift[]
+  availabilities  Availability[]
+  changeRequests  ChangeRequest[]
+  auditLogs       AuditLog[]
+  documents       Document[]
+  submissions     DocumentSubmission[]
+  notifications   Notification[]
+
+  @@map("stores")
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  storeId   String   @map("store_id")
+  role      Role
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storeId])
+  @@index([storeId, role])
+  @@map("memberships")
+}
+
+model ScheduleMonth {
+  id        String      @id @default(cuid())
+  storeId   String      @map("store_id")
+  year      Int
+  month     Int
+  status    MonthStatus @default(OPEN)
+  lockAt    DateTime?   @map("lock_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  store        Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shifts       Shift[]
+  availabilities Availability[]
+
+  @@unique([storeId, year, month])
+  @@map("schedule_months")
+}
+
+model Shift {
+  id         String      @id @default(cuid())
+  storeId    String      @map("store_id")
+  monthId    String      @map("month_id")
+  userId     String      @map("user_id")
+  date       DateTime
+  startTime  String      @map("start_time")
+  endTime    String      @map("end_time")
+  breakMins  Int         @default(0) @map("break_mins")
+  status     ShiftStatus @default(DRAFT)
+  isCanceled Boolean     @default(false) @map("is_canceled")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  store          Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  month          ScheduleMonth      @relation(fields: [monthId], references: [id], onDelete: Cascade)
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  changeRequests ChangeRequest[]
+
+  @@index([storeId, date])
+  @@index([userId, date])
+  @@index([monthId])
+  @@map("shifts")
+}
+
+model Availability {
+  id        String    @id @default(cuid())
+  storeId   String    @map("store_id")
+  userId    String    @map("user_id")
+  monthId   String    @map("month_id")
+  date      DateTime
+  startTime String?   @map("start_time")
+  endTime   String?   @map("end_time")
+  type      String    @default("UNAVAILABLE")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  store Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month ScheduleMonth @relation(fields: [monthId], references: [id], onDelete: Cascade)
+
+  @@index([monthId, userId])
+  @@index([storeId, date])
+  @@map("availabilities")
+}
+
+model ChangeRequest {
+  id                String              @id @default(cuid())
+  storeId            String              @map("store_id")
+  type              ChangeRequestType
+  status            ChangeRequestStatus @default(PENDING)
+  shiftId           String              @map("shift_id")
+  createdById       String              @map("created_by_id")
+  reviewedById      String?             @map("reviewed_by_id")
+  reviewedAt        DateTime?           @map("reviewed_at")
+  reason            String?
+  decisionNote      String?             @map("decision_note")
+  proposedStartTime String?             @map("proposed_start_time")
+  proposedEndTime   String?             @map("proposed_end_time")
+  proposedBreakMins Int?                @map("proposed_break_mins")
+  targetUserId      String?             @map("target_user_id")
+  swapShiftId       String?             @map("swap_shift_id")
+  effectiveAt       DateTime?           @map("effective_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  store      Store                     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shift      Shift                     @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  createdBy  User                      @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  reviewedBy User?                     @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  candidates ChangeRequestCandidate[]
+
+  @@index([storeId, status, createdAt])
+  @@index([shiftId])
+  @@map("change_requests")
+}
+
+model ChangeRequestCandidate {
+  id        String         @id @default(cuid())
+  requestId String         @map("request_id")
+  userId    String         @map("user_id")
+  note      String?
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  request ChangeRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, userId])
+  @@index([requestId])
+  @@map("change_request_candidates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  storeId    String   @map("store_id")
+  actorId    String   @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  actor User  @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, createdAt])
+  @@map("audit_logs")
+}
+
+model Document {
+  id         String       @id @default(cuid())
+  storeId    String       @map("store_id")
+  title      String
+  type       DocumentType
+  version    Int          @default(1)
+  fileUrl    String       @map("file_url")
+  createdById String      @map("created_by_id")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  store   Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdBy User            @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  targets  DocumentTarget[]
+  acks     DocumentAck[]
+
+  @@index([storeId, type])
+  @@map("documents")
+}
+
+model DocumentTarget {
+  documentId String   @map("document_id")
+  userId     String   @map("user_id")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, userId])
+  @@map("document_targets")
+}
+
+model DocumentAck {
+  documentId     String   @map("document_id")
+  userId         String   @map("user_id")
+  version        Int
+  acknowledgedAt DateTime @default(now()) @map("acknowledged_at")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, userId, version])
+  @@index([userId])
+  @@map("document_acks")
+}
+
+model DocumentSubmission {
+  id          String           @id @default(cuid())
+  storeId     String           @map("store_id")
+  userId      String           @map("user_id")
+  type        DocumentType
+  fileUrl     String           @map("file_url")
+  issuedAt    DateTime?        @map("issued_at")
+  expiresAt   DateTime?        @map("expires_at")
+  status      SubmissionStatus @default(SUBMITTED)
+  reviewedById String?         @map("reviewed_by_id")
+  reviewedAt  DateTime?        @map("reviewed_at")
+  note        String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  store       Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy  User?  @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([storeId, type])
+  @@index([storeId, expiresAt])
+  @@index([userId, type])
+  @@map("document_submissions")
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  storeId     String             @map("store_id")
+  userId      String             @map("user_id")
+  type        NotificationType
+  status      NotificationStatus @default(PENDING)
+  channel     NotificationChannel @default(IN_APP)
+  title       String
+  message     String
+  data        Json?
+  scheduledAt DateTime?          @map("scheduled_at")
+  sentAt      DateTime?          @map("sent_at")
+  readAt      DateTime?          @map("read_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  store Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs  NotificationJob[]
+
+  @@index([storeId, userId, createdAt])
+  @@index([storeId, userId, readAt])
+  @@index([status, scheduledAt])
+  @@map("notifications")
+}
+
+model NotificationJob {
+  id             String             @id @default(cuid())
+  notificationId String             @map("notification_id")
+  status         NotificationStatus @default(PENDING)
+  attempts       Int                @default(0)
+  lastError      String?            @map("last_error")
+  runAt          DateTime           @default(now()) @map("run_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([status, runAt])
+  @@index([notificationId])
+  @@map("notification_jobs")
+}

@@ -1,0 +1,73 @@
+"use client"
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import type { Member } from "@/lib/types"
+import { MoreHorizontal } from "lucide-react"
+
+interface MemberTableProps {
+  members: Member[]
+  onChangeRole?: (memberId: string) => void
+  onRemove?: (memberId: string) => void
+}
+
+export function MemberTable({ members, onChangeRole, onRemove }: MemberTableProps) {
+  if (members.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-12 text-center">
+        <p className="text-sm text-muted-foreground">No members yet. Invite someone to get started.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {members.map((member) => (
+            <TableRow key={member.id}>
+              <TableCell className="font-medium">{member.name}</TableCell>
+              <TableCell>{member.email}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={member.role === "OWNER" ? "default" : member.role === "MANAGER" ? "secondary" : "outline"}
+                >
+                  {member.role}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={member.status === "ACTIVE" ? "default" : "secondary"}>{member.status}</Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onChangeRole?.(member.id)}>Change role</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRemove?.(member.id)} className="text-destructive">
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
