@@ -5,19 +5,28 @@
 ## 📁 프로젝트 구조
 
 ```
-Shiftory-main/
+Shiftory/
 ├── shiftory-api/          # NestJS 백엔드 API
+│   ├── src/               # 소스 코드
+│   ├── prisma/            # 데이터베이스 스키마
+│   └── README.md          # 백엔드 상세 문서
+│
 ├── staff-scheduling-ui/   # Next.js 프론트엔드
-└── README.md             # 이 파일
+│   ├── app/               # Next.js App Router 페이지
+│   ├── components/        # React 컴포넌트
+│   └── lib/               # 유틸리티 및 API 클라이언트
+│
+└── README.md              # 이 파일
 ```
 
 ## 🚀 빠른 시작
 
-### 배포 (Railway 추천)
+### 배포 (Railway 추천) ⭐
 
-Railway에서 프론트엔드, 백엔드, 데이터베이스를 한 곳에서 배포:
+**초보자용**: [`EASY_DEPLOY.md`](./EASY_DEPLOY.md) - 가장 쉬운 단계별 가이드  
+**상세 가이드**: [`RAILWAY_DEPLOYMENT.md`](./RAILWAY_DEPLOYMENT.md) - 상세 설명
 
-**가이드**: [`QUICK_START.md`](./QUICK_START.md) 또는 [`RAILWAY_DEPLOYMENT.md`](./RAILWAY_DEPLOYMENT.md) 참고
+Railway에서 프론트엔드, 백엔드, 데이터베이스를 한 곳에서 배포합니다.
 
 ### 로컬 개발
 
@@ -42,13 +51,10 @@ npm run dev
 ## 📚 문서
 
 ### 배포 가이드
-- [`QUICK_START.md`](./QUICK_START.md) - 빠른 배포 가이드
-- [`RAILWAY_DEPLOYMENT.md`](./RAILWAY_DEPLOYMENT.md) - Railway 한 곳 배포 (추천)
+- ⭐ **[`EASY_DEPLOY.md`](./EASY_DEPLOY.md)** - **초보자용 쉬운 배포 가이드 (추천!)**
+- [`RAILWAY_DEPLOYMENT.md`](./RAILWAY_DEPLOYMENT.md) - Railway 상세 배포 가이드
 - [`RAILWAY_FIX.md`](./RAILWAY_FIX.md) - Railway 배포 문제 해결
-- [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) - Vercel 배포 가이드
-- [`BACKEND_DEPLOYMENT.md`](./BACKEND_DEPLOYMENT.md) - 백엔드 배포 가이드
-- [`SINGLE_PLATFORM_DEPLOYMENT.md`](./SINGLE_PLATFORM_DEPLOYMENT.md) - 한 곳 배포 옵션
-- [`DEPLOYMENT.md`](./DEPLOYMENT.md) - Docker 배포 가이드 (레거시)
+- [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) - Vercel 배포 가이드 (선택사항)
 
 ### 백엔드 문서
 - [`shiftory-api/README.md`](./shiftory-api/README.md) - 백엔드 상세 문서
@@ -108,14 +114,12 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 - 프론트엔드, 백엔드, 데이터베이스 한 곳에서 관리
 - 무료 티어 제공
 - GitHub 자동 배포
+- **가이드**: [`EASY_DEPLOY.md`](./EASY_DEPLOY.md)
 
 ### Vercel + Railway
 - Vercel: 프론트엔드
 - Railway: 백엔드 + 데이터베이스
-
-### Docker
-- Docker Compose로 전체 스택 실행
-- 프로덕션 배포 가능
+- **가이드**: [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md)
 
 ## 🤝 기여
 
@@ -124,4 +128,3 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 ## 📄 라이선스
 
 MIT
-
