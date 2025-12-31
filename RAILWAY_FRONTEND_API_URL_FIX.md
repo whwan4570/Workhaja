@@ -35,7 +35,8 @@ Railway 대시보드에서:
 #### 백엔드 URL 확인:
 1. **백엔드 서비스** (`workhaja-back-production`) 선택
 2. **"Settings"** 탭 클릭
-3. 생성된 도메인 확인 (예: `https://workhaja-back-production.up.railway.app`)
+3. 생성된 도메인 확인: `https://workhaja-production.up.railway.app`
+   - 이 도메인이 백엔드 도메인입니다
 
 #### 프론트엔드 Variables 설정:
 1. **프론트엔드 서비스** → **"Variables"** 탭
@@ -55,23 +56,24 @@ Railway 대시보드에서:
 
 ```
 프론트엔드 서비스:
-  Name: workhaja-production
-  Domain: https://workhaja-production.up.railway.app
+  Domain: https://soothing-fulfillment-production.up.railway.app
   Variables:
-    NEXT_PUBLIC_API_URL=https://workhaja-back-production.up.railway.app
+    NEXT_PUBLIC_API_URL=https://workhaja-production.up.railway.app
 
 백엔드 서비스:
   Name: workhaja-back-production
-  Domain: https://workhaja-back-production.up.railway.app
+  Domain: https://workhaja-production.up.railway.app
+  Variables:
+    FRONTEND_URL=https://soothing-fulfillment-production.up.railway.app
 ```
 
 ### 4. 잘못된 설정 예시
 
 ❌ **잘못됨:**
 ```
-NEXT_PUBLIC_API_URL=https://workhaja-production.up.railway.app
+NEXT_PUBLIC_API_URL=https://soothing-fulfillment-production.up.railway.app
 ```
-→ 프론트엔드 자신의 URL로 설정 (자기 자신에게 요청)
+→ 프론트엔드 자신의 URL로 설정 (자기 자신에게 요청 - 백엔드가 없음!)
 
 ❌ **잘못됨:**
 ```
@@ -101,8 +103,8 @@ NEXT_PUBLIC_API_URL=https://workhaja-back-production.up.railway.app/api
 2. **Network** 탭 열기
 3. 회원가입/로그인 시도
 4. 요청 URL 확인:
-   - ✅ 올바름: `https://workhaja-back-production.up.railway.app/auth/register`
-   - ❌ 잘못됨: `https://workhaja-production.up.railway.app/auth/register`
+   - ✅ 올바름: `https://workhaja-production.up.railway.app/auth/register` (백엔드 도메인)
+   - ❌ 잘못됨: `https://soothing-fulfillment-production.up.railway.app/auth/register` (프론트엔드 도메인)
 
 ## 체크리스트
 
@@ -135,8 +137,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 ## 요약
 
-1. **백엔드 도메인 확인**: `https://workhaja-back-production.up.railway.app`
-2. **프론트엔드 Variables에 `NEXT_PUBLIC_API_URL` 설정**: 백엔드 도메인으로
+**도메인 정보:**
+- 백엔드: `https://workhaja-production.up.railway.app`
+- 프론트엔드: `https://soothing-fulfillment-production.up.railway.app`
+
+**환경 변수 설정:**
+1. **프론트엔드 Variables**: `NEXT_PUBLIC_API_URL=https://workhaja-production.up.railway.app` (백엔드 도메인)
+2. **백엔드 Variables**: `FRONTEND_URL=https://soothing-fulfillment-production.up.railway.app` (프론트엔드 도메인)
 3. **재배포 대기**: 자동 재배포 완료될 때까지
 4. **브라우저에서 확인**: Network 탭에서 실제 요청 URL 확인
 
