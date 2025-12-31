@@ -8,13 +8,13 @@ export const mockStores: Store[] = [
 ]
 
 export const mockMembers: Member[] = [
-  { id: "1", name: "Alice Johnson", email: "alice@shiftory.com", role: "OWNER", status: "ACTIVE" },
-  { id: "2", name: "Bob Smith", email: "bob@shiftory.com", role: "MANAGER", status: "ACTIVE" },
-  { id: "3", name: "Carol Davis", email: "carol@shiftory.com", role: "WORKER", status: "ACTIVE" },
-  { id: "4", name: "David Wilson", email: "david@shiftory.com", role: "WORKER", status: "ACTIVE" },
-  { id: "5", name: "Eve Martinez", email: "eve@shiftory.com", role: "WORKER", status: "INACTIVE" },
-  { id: "6", name: "Frank Brown", email: "frank@shiftory.com", role: "WORKER", status: "ACTIVE" },
-  { id: "7", name: "Grace Lee", email: "grace@shiftory.com", role: "MANAGER", status: "ACTIVE" },
+  { id: "1", name: "Alice Johnson", email: "alice@workhaja.com", role: "OWNER", status: "ACTIVE" },
+  { id: "2", name: "Bob Smith", email: "bob@workhaja.com", role: "MANAGER", status: "ACTIVE" },
+  { id: "3", name: "Carol Davis", email: "carol@workhaja.com", role: "WORKER", status: "ACTIVE" },
+  { id: "4", name: "David Wilson", email: "david@workhaja.com", role: "WORKER", status: "ACTIVE" },
+  { id: "5", name: "Eve Martinez", email: "eve@workhaja.com", role: "WORKER", status: "INACTIVE" },
+  { id: "6", name: "Frank Brown", email: "frank@workhaja.com", role: "WORKER", status: "ACTIVE" },
+  { id: "7", name: "Grace Lee", email: "grace@workhaja.com", role: "MANAGER", status: "ACTIVE" },
 ]
 
 export const mockShifts: Shift[] = [
