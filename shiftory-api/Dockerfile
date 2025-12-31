@@ -8,7 +8,8 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm ci
+# Use npm install instead of npm ci to handle package-lock.json updates
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -29,7 +30,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
