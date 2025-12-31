@@ -46,7 +46,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in to Shiftory</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sign in to Workhaja</CardTitle>
           <CardDescription>Use your admin account to manage schedules.</CardDescription>
         </CardHeader>
         <CardContent>

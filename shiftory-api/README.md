@@ -1,4 +1,4 @@
-# Shiftory API
+# Workhaja API
 
 A NestJS-based backend API for shift management with JWT authentication and role-based access control.
 

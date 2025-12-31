@@ -41,7 +41,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b px-4">
-          {!collapsed && <h1 className="text-xl font-bold text-sidebar-foreground">Shiftory</h1>}
+          {!collapsed && <h1 className="text-xl font-bold text-sidebar-foreground">Workhaja</h1>}
           <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} className="ml-auto">
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>

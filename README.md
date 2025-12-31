@@ -1,11 +1,11 @@
-# Shiftory
+# Workhaja
 
 직원 스케줄 관리 시스템 - 프론트엔드와 백엔드가 분리된 모노레포 프로젝트입니다.
 
 ## 📁 프로젝트 구조
 
 ```
-Shiftory/
+Workhaja/
 ├── shiftory-api/          # NestJS 백엔드 API
 │   ├── src/               # 소스 코드
 │   ├── prisma/            # 데이터베이스 스키마

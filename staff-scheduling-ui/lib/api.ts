@@ -1,5 +1,5 @@
 /**
- * API client for Shiftory backend
+ * API client for Workhaja backend
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'

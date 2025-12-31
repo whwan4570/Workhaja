@@ -45,7 +45,7 @@ export async function getWeekStartsOn(storeId: string): Promise<number> {
 
   // Fallback to localStorage
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('shiftory_weekStartsOn')
+    const stored = localStorage.getItem('workhaja_weekStartsOn')
     if (stored !== null) {
       const value = Number.parseInt(stored, 10)
       if (value === 0 || value === 1) {
@@ -67,6 +67,6 @@ export function setWeekStartsOn(weekStartsOn: number): void {
   if (weekStartsOn !== 0 && weekStartsOn !== 1) {
     throw new Error('weekStartsOn must be 0 (Sunday) or 1 (Monday)')
   }
-  localStorage.setItem('shiftory_weekStartsOn', String(weekStartsOn))
+  localStorage.setItem('workhaja_weekStartsOn', String(weekStartsOn))
 }
 

@@ -69,14 +69,14 @@ export default function NotificationsDebugPage() {
 
   const loadInternalKey = () => {
     if (typeof window !== "undefined") {
-      const key = localStorage.getItem("shiftory_internal_key") || ""
+      const key = localStorage.getItem("workhaja_internal_key") || ""
       setInternalKey(key)
     }
   }
 
   const saveInternalKey = (key: string) => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("shiftory_internal_key", key)
+      localStorage.setItem("workhaja_internal_key", key)
     }
     setInternalKey(key)
   }
@@ -206,7 +206,7 @@ export default function NotificationsDebugPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  This key is stored in localStorage as "shiftory_internal_key"
+                  This key is stored in localStorage as "workhaja_internal_key"
                 </p>
               </div>
             </CardContent>

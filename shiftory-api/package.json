@@ -1,7 +1,7 @@
 {
-  "name": "shiftory-api",
+  "name": "workhaja-api",
   "version": "1.0.0",
-  "description": "Shiftory API - Shift management backend",
+  "description": "Workhaja API - Shift management backend",
   "author": "",
   "private": true,
   "license": "MIT",

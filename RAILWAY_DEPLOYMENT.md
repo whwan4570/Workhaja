@@ -1,4 +1,4 @@
-# Railway 한 곳 배포 가이드
+# Workhaja Railway 배포 가이드
 
 Railway에서 프론트엔드, 백엔드, 데이터베이스를 모두 배포하는 방법입니다.
 
