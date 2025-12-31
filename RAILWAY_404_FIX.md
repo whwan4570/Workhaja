@@ -91,16 +91,24 @@ Variables:
 브라우저나 curl로 직접 테스트:
 
 ```bash
-# 백엔드가 정상 작동하는지 확인
+# 백엔드가 정상 작동하는지 확인 (Unix/Linux/Mac)
 curl https://workhaja-back-production.up.railway.app/auth/register \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
+
+# Windows PowerShell의 경우
+curl.exe -X POST https://workhaja-back-production.up.railway.app/auth/register `
+  -H "Content-Type: application/json" `
+  -d "{\"email\":\"test@example.com\",\"password\":\"password123\",\"name\":\"Test User\"}"
 ```
 
 **예상 응답:**
-- 성공: `{"accessToken":"...","storeId":"..."}`
-- 에러: 400, 401 등 (404가 아니어야 함)
+- ✅ 성공 (200): `{"accessToken":"...","storeId":"..."}`
+- ⚠️ 400 Bad Request: 요청 데이터 문제
+- ⚠️ 401 Unauthorized: 인증 문제
+- ❌ 502 Bad Gateway: **백엔드 서버가 실행되지 않음** - Railway 대시보드에서 백엔드 서비스 상태 확인 필요
+- ❌ 404 Not Found: 경로가 잘못되었거나 백엔드가 해당 엔드포인트를 제공하지 않음
 
 ### 7. 프론트엔드에서 API 호출 확인
 
