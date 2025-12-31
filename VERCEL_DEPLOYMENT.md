@@ -1,6 +1,6 @@
 # Vercel 배포 가이드
 
-이 가이드는 Shiftory 프론트엔드를 Vercel에 배포하는 방법을 설명합니다.
+이 가이드는 Workhaja 프론트엔드를 Vercel에 배포하는 방법을 설명합니다.
 
 ## 📋 사전 준비
 

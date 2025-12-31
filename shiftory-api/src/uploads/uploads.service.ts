@@ -24,15 +24,15 @@ export class UploadsService {
 
     // Only initialize S3 client if configuration is provided
     if (accessKeyId && secretAccessKey && this.bucket) {
-      this.s3Client = new S3Client({
-        endpoint,
-        region: region === 'auto' ? undefined : region,
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-        forcePathStyle: endpoint ? true : false, // For R2 and other S3-compatible services
-      });
+    this.s3Client = new S3Client({
+      endpoint,
+      region: region === 'auto' ? undefined : region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+      forcePathStyle: endpoint ? true : false, // For R2 and other S3-compatible services
+    });
     }
   }
 

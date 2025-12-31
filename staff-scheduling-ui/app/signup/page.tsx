@@ -100,16 +100,16 @@ export default function SignUpPage() {
 
             {isOwner ? (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="organizationName">Organization Name</Label>
-                  <Input
-                    id="organizationName"
-                    type="text"
-                    placeholder="My Coffee Shop"
-                    value={formData.organizationName}
-                    onChange={(e) => updateFormData("organizationName", e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="organizationName">Organization Name</Label>
+                <Input
+                  id="organizationName"
+                  type="text"
+                  placeholder="My Coffee Shop"
+                  value={formData.organizationName}
+                  onChange={(e) => updateFormData("organizationName", e.target.value)}
+                />
+              </div>
                 <div className="space-y-2">
                   <Label htmlFor="industry">Industry</Label>
                   <Select value={formData.industry} onValueChange={(value) => updateFormData("industry", value)}>
