@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY pnpm-lock.yaml ./
 
 # Install pnpm if needed, or use npm
-RUN npm install -g pnpm && pnpm install --frozen-lockfile || npm ci
+RUN npm install -g pnpm && pnpm install --frozen-lockfile || npm install
 
 # Copy source code
 COPY . .
@@ -21,7 +21,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build || pnpm build
 
 # Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ COPY package*.json ./
 COPY pnpm-lock.yaml ./
 
 # Install production dependencies
-RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile || npm ci --only=production
+RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile || npm install --omit=dev
 
 # Copy built application from builder
 COPY --from=builder /app/.next ./.next
