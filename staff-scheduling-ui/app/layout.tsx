@@ -41,7 +41,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         {children}
         <Toaster />
-        <Analytics />
+        {process.env.VERCEL && <Analytics />}
       </body>
     </html>
   )
