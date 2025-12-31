@@ -22,21 +22,18 @@ export class UploadsService {
     this.bucket = process.env.S3_BUCKET || '';
     this.publicBaseUrl = process.env.S3_PUBLIC_BASE_URL || '';
 
-    if (!accessKeyId || !secretAccessKey || !this.bucket) {
-      throw new Error(
-        'S3 configuration missing: S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_BUCKET required',
-      );
+    // Only initialize S3 client if configuration is provided
+    if (accessKeyId && secretAccessKey && this.bucket) {
+      this.s3Client = new S3Client({
+        endpoint,
+        region: region === 'auto' ? undefined : region,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+        forcePathStyle: endpoint ? true : false, // For R2 and other S3-compatible services
+      });
     }
-
-    this.s3Client = new S3Client({
-      endpoint,
-      region: region === 'auto' ? undefined : region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-      forcePathStyle: endpoint ? true : false, // For R2 and other S3-compatible services
-    });
   }
 
   /**
@@ -48,6 +45,13 @@ export class UploadsService {
     filename: string,
     contentType: string,
   ): Promise<{ uploadUrl: string; fileUrl: string; method: string }> {
+    // Check if S3 is configured
+    if (!this.s3Client || !this.bucket) {
+      throw new BadRequestException(
+        'File upload is not configured. Please set S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, and S3_BUCKET environment variables.',
+      );
+    }
+
     // Sanitize filename
     const sanitizedFilename = filename
       .replace(/[^a-zA-Z0-9._-]/g, '_')
