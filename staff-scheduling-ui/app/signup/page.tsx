@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { authApi } from "@/lib/api"
 
 export default function SignUpPage() {
@@ -20,6 +21,7 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    industry: "",
   })
   const [isOwner, setIsOwner] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
@@ -97,16 +99,40 @@ export default function SignUpPage() {
             </div>
 
             {isOwner ? (
-              <div className="space-y-2">
-                <Label htmlFor="organizationName">Organization Name</Label>
-                <Input
-                  id="organizationName"
-                  type="text"
-                  placeholder="My Coffee Shop"
-                  value={formData.organizationName}
-                  onChange={(e) => updateFormData("organizationName", e.target.value)}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="organizationName">Organization Name</Label>
+                  <Input
+                    id="organizationName"
+                    type="text"
+                    placeholder="My Coffee Shop"
+                    value={formData.organizationName}
+                    onChange={(e) => updateFormData("organizationName", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Select value={formData.industry} onValueChange={(value) => updateFormData("industry", value)}>
+                    <SelectTrigger id="industry">
+                      <SelectValue placeholder="Please select the type of business of your company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hospitality">Hospitality, Restaurant & Catering</SelectItem>
+                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="employment-agency">Employment Agency</SelectItem>
+                      <SelectItem value="sports-centers">Sports Centers</SelectItem>
+                      <SelectItem value="logistics">Logistics</SelectItem>
+                      <SelectItem value="services">Services</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Common positions: Chef, Assistant Chef, Waiter, Cleaning, Foreman, Service Technician, Operator, Doctor, Head Nurse, Nurse
+                  </p>
+                </div>
+              </>
             ) : (
               <div className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/50 p-4">
                 <p className="text-sm text-muted-foreground mb-2">Have an invite code?</p>
