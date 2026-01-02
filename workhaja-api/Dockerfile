@@ -40,5 +40,5 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 EXPOSE 3000
 
 # Run migrations and start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && echo 'Migrations complete, starting server...' && node dist/main.js || (echo 'Server failed to start' && cat /proc/version && ls -la dist/ && exit 1)"]
 
