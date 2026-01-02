@@ -101,8 +101,8 @@ export class StoresService {
       id: result.id,
       name: result.name,
       timezone: result.timezone,
-      location: result.location || undefined,
-      specialCode: result.specialCode,
+      location: (result as any).location || undefined,
+      specialCode: (result as any).specialCode || 'N/A',
       createdAt: result.createdAt,
       updatedAt: result.updatedAt,
     };
@@ -114,28 +114,37 @@ export class StoresService {
    * @returns List of stores with user's role
    */
   async getUserStores(userId: string): Promise<StoreResponse[]> {
-    const memberships = await this.prisma.membership.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        store: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    try {
+      const memberships = await this.prisma.membership.findMany({
+        where: {
+          userId,
+        },
+        include: {
+          store: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
 
-    return memberships.map((membership) => ({
-      id: membership.store.id,
-      name: membership.store.name,
-      timezone: membership.store.timezone,
-      location: membership.store.location || undefined,
-      specialCode: membership.store.specialCode,
-      createdAt: membership.store.createdAt,
-      updatedAt: membership.store.updatedAt,
-      role: membership.role,
-    }));
+      return memberships.map((membership) => {
+        // Safely access specialCode - it may not exist if migration hasn't completed
+        const specialCode = (membership.store as any).specialCode || 'N/A';
+        return {
+          id: membership.store.id,
+          name: membership.store.name,
+          timezone: membership.store.timezone,
+          location: (membership.store as any).location || undefined,
+          specialCode,
+          createdAt: membership.store.createdAt,
+          updatedAt: membership.store.updatedAt,
+          role: membership.role,
+        };
+      });
+    } catch (error) {
+      console.error('Error in getUserStores:', error);
+      throw error;
+    }
   }
 
   /**
@@ -157,8 +166,8 @@ export class StoresService {
       id: store.id,
       name: store.name,
       timezone: store.timezone,
-      location: store.location || undefined,
-      specialCode: store.specialCode,
+      location: (store as any).location || undefined,
+      specialCode: (store as any).specialCode || 'N/A',
       createdAt: store.createdAt,
       updatedAt: store.updatedAt,
     };
@@ -226,8 +235,8 @@ export class StoresService {
       id: updatedStore.id,
       name: updatedStore.name,
       timezone: updatedStore.timezone,
-      location: updatedStore.location || undefined,
-      specialCode: updatedStore.specialCode,
+      location: (updatedStore as any).location || undefined,
+      specialCode: (updatedStore as any).specialCode || 'N/A',
       createdAt: updatedStore.createdAt,
       updatedAt: updatedStore.updatedAt,
     };
