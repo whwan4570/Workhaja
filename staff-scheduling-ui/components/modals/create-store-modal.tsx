@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -50,11 +50,11 @@ export function CreateStoreModal({ open, onOpenChange, onSubmit }: CreateStoreMo
   }
 
   // Generate code on mount if empty
-  React.useEffect(() => {
+  useEffect(() => {
     if (open && !specialCode) {
       generateSpecialCode()
     }
-  }, [open])
+  }, [open, specialCode])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
