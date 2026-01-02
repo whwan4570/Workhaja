@@ -8,5 +8,5 @@ cmds = ["npm install"]
 cmds = ["npx prisma generate", "npm run build"]
 
 [start]
-cmd = "npx prisma migrate resolve --rolled-back 20260102120000_add_store_location_and_special_code 2>/dev/null || true; (npx prisma migrate deploy || (echo 'Migration failed, syncing schema...' && npx prisma db push --accept-data-loss)); npm run start:prod"
+cmd = "npx prisma migrate resolve --rolled-back 20260102120000_add_store_location_and_special_code 2>/dev/null || true; npx prisma migrate deploy 2>&1 || echo 'Migration failed, using db push...'; npx prisma db push --accept-data-loss --skip-generate; npm run start:prod"
 
