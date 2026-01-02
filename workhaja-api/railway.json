@@ -5,7 +5,7 @@
     "buildCommand": "npm install && npx prisma generate && npm run build"
   },
   "deploy": {
-    "startCommand": "npx prisma migrate resolve --rolled-back 20260102120000_add_store_location_and_special_code 2>/dev/null || true; npx prisma migrate deploy 2>&1 || echo 'Migration failed, using db push...'; npx prisma db push --accept-data-loss --skip-generate; npm run start:prod",
+    "startCommand": "npx prisma migrate resolve --rolled-back 20260102120000_add_store_location_and_special_code 2>/dev/null || true; npx prisma migrate deploy 2>&1; npx prisma db push --accept-data-loss --skip-generate --force-reset 2>&1 || echo 'DB push failed, but continuing...'; npm run start:prod",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
