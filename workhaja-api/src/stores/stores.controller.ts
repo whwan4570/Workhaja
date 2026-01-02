@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Param,
   UseGuards,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import { CreateStoreDto } from './dto/create-store.dto';
+import { UpdateStoreDto } from './dto/update-store.dto';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -51,6 +53,26 @@ export class StoresController {
   @Get()
   async getStores(@CurrentUser() user: RequestUser) {
     return this.storesService.getUserStores(user.id);
+  }
+
+  /**
+   * Update a store
+   * PUT /stores/:storeId
+   * Headers: Authorization: Bearer <token>
+   * Body: { name?, timezone?, location?, specialCode? }
+   * Requires: OWNER role in the store
+   * Returns: Updated store
+   */
+  @Put(':storeId')
+  @UseInterceptors(StoreContextInterceptor)
+  @UseGuards(RolesGuard)
+  @Roles(Role.OWNER)
+  async updateStore(
+    @CurrentUser() user: RequestUser,
+    @Param('storeId') storeId: string,
+    @Body() updateStoreDto: UpdateStoreDto,
+  ) {
+    return this.storesService.updateStore(storeId, user.id, updateStoreDto);
   }
 
   /**

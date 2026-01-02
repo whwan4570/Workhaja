@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-interface CreateStoreModalProps {
+interface EditStoreModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  store: {
+    id: string
+    name: string
+    timezone: string
+    location?: string
+    specialCode: string
+  } | null
   onSubmit?: (data: { name: string; timezone: string; location?: string; specialCode: string }) => void
 }
 
@@ -33,28 +40,20 @@ const timezones = [
   "Asia/Tokyo",
 ]
 
-export function CreateStoreModal({ open, onOpenChange, onSubmit }: CreateStoreModalProps) {
+export function EditStoreModal({ open, onOpenChange, store, onSubmit }: EditStoreModalProps) {
   const [name, setName] = useState("")
   const [timezone, setTimezone] = useState("America/New_York")
   const [location, setLocation] = useState("")
   const [specialCode, setSpecialCode] = useState("")
 
-  // Generate a random special code if empty
-  const generateSpecialCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let code = ''
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length))
+  useEffect(() => {
+    if (store && open) {
+      setName(store.name)
+      setTimezone(store.timezone)
+      setLocation(store.location || "")
+      setSpecialCode(store.specialCode)
     }
-    setSpecialCode(code)
-  }
-
-  // Generate code on mount if empty
-  React.useEffect(() => {
-    if (open && !specialCode) {
-      generateSpecialCode()
-    }
-  }, [open])
+  }, [store, open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,21 +61,20 @@ export function CreateStoreModal({ open, onOpenChange, onSubmit }: CreateStoreMo
       alert('Special code must be at least 4 characters')
       return
     }
+    if (!store) return
     onSubmit?.({ name, timezone, location: location || undefined, specialCode })
-    setName("")
-    setTimezone("America/New_York")
-    setLocation("")
-    setSpecialCode("")
     onOpenChange(false)
   }
+
+  if (!store) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create Store</DialogTitle>
-            <DialogDescription>Add a new store location to your organization.</DialogDescription>
+            <DialogTitle>Edit Store</DialogTitle>
+            <DialogDescription>Update store information.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -114,18 +112,7 @@ export function CreateStoreModal({ open, onOpenChange, onSubmit }: CreateStoreMo
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="specialCode">Special Code</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={generateSpecialCode}
-                  className="h-7 text-xs"
-                >
-                  Generate
-                </Button>
-              </div>
+              <Label htmlFor="specialCode">Special Code</Label>
               <Input
                 id="specialCode"
                 placeholder="e.g., STORE-ABC123"
@@ -144,10 +131,11 @@ export function CreateStoreModal({ open, onOpenChange, onSubmit }: CreateStoreMo
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create Store</Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
+

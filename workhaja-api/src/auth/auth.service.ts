@@ -44,10 +44,38 @@ export class AuthService {
     // Create user (UsersService handles email uniqueness check)
     const user = await this.usersService.createUser(email, password, name);
 
+    // Generate a unique special code for the store
+    const generateSpecialCode = (): string => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = 'STORE-';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    };
+
     // Create a store for the new user and assign them as OWNER
-    const store = await this.storesService.createStore(user.id, {
-      name: `${name}'s Store`,
-    });
+    // Retry if special code already exists (unlikely but possible)
+    let store;
+    let attempts = 0;
+    while (!store && attempts < 5) {
+      try {
+        store = await this.storesService.createStore(user.id, {
+          name: `${name}'s Store`,
+          specialCode: generateSpecialCode(),
+        });
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('Special code already exists')) {
+          attempts++;
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    if (!store) {
+      throw new Error('Failed to create store after multiple attempts');
+    }
 
     // Generate and return JWT token with store ID
     return {

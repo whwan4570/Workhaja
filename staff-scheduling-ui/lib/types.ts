@@ -6,6 +6,8 @@ export interface Store {
   id: string
   name: string
   timezone: string
+  location?: string
+  specialCode: string
   myRole: UserRole
 }
 

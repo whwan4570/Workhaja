@@ -154,6 +154,8 @@ export const storesApi = {
         id: string
         name: string
         timezone: string
+        location?: string
+        specialCode: string
         createdAt: string
         updatedAt: string
         role?: 'OWNER' | 'MANAGER' | 'WORKER'
@@ -164,15 +166,35 @@ export const storesApi = {
   /**
    * Create a new store
    */
-  async createStore(data: { name: string; timezone?: string }) {
+  async createStore(data: { name: string; timezone?: string; location?: string; specialCode: string }) {
     return apiRequest<{
       id: string
       name: string
       timezone: string
+      location?: string
+      specialCode: string
       createdAt: string
       updatedAt: string
     }>('/stores', {
       method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Update a store
+   */
+  async updateStore(storeId: string, data: { name?: string; timezone?: string; location?: string; specialCode?: string }) {
+    return apiRequest<{
+      id: string
+      name: string
+      timezone: string
+      location?: string
+      specialCode: string
+      createdAt: string
+      updatedAt: string
+    }>(`/stores/${storeId}`, {
+      method: 'PUT',
       body: JSON.stringify(data),
     })
   },

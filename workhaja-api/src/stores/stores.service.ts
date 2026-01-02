@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { CreateStoreDto } from './dto/create-store.dto';
+import { UpdateStoreDto } from './dto/update-store.dto';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { Role } from '@prisma/client';
 
@@ -17,6 +18,8 @@ export interface StoreResponse {
   id: string;
   name: string;
   timezone: string;
+  location?: string;
+  specialCode: string;
   createdAt: Date;
   updatedAt: Date;
   role?: Role; // User's role in this store (for list endpoints)
@@ -59,7 +62,16 @@ export class StoresService {
     userId: string,
     createStoreDto: CreateStoreDto,
   ): Promise<StoreResponse> {
-    const { name, timezone = 'America/New_York' } = createStoreDto;
+    const { name, timezone = 'America/New_York', location, specialCode } = createStoreDto;
+
+    // Check if specialCode already exists
+    const existingStore = await this.prisma.store.findUnique({
+      where: { specialCode },
+    });
+
+    if (existingStore) {
+      throw new BadRequestException('Special code already exists. Please choose a different code.');
+    }
 
     // Create store and membership in a transaction
     const result = await this.prisma.$transaction(async (tx) => {
@@ -68,6 +80,8 @@ export class StoresService {
         data: {
           name,
           timezone,
+          location,
+          specialCode,
         },
       });
 
@@ -87,6 +101,8 @@ export class StoresService {
       id: result.id,
       name: result.name,
       timezone: result.timezone,
+      location: result.location || undefined,
+      specialCode: result.specialCode,
       createdAt: result.createdAt,
       updatedAt: result.updatedAt,
     };
@@ -114,6 +130,8 @@ export class StoresService {
       id: membership.store.id,
       name: membership.store.name,
       timezone: membership.store.timezone,
+      location: membership.store.location || undefined,
+      specialCode: membership.store.specialCode,
       createdAt: membership.store.createdAt,
       updatedAt: membership.store.updatedAt,
       role: membership.role,
@@ -139,8 +157,79 @@ export class StoresService {
       id: store.id,
       name: store.name,
       timezone: store.timezone,
+      location: store.location || undefined,
+      specialCode: store.specialCode,
       createdAt: store.createdAt,
       updatedAt: store.updatedAt,
+    };
+  }
+
+  /**
+   * Update a store
+   * @param storeId - Store ID
+   * @param userId - User ID (must be OWNER)
+   * @param updateStoreDto - Store update data
+   * @returns Updated store
+   * @throws NotFoundException if store not found
+   * @throws ForbiddenException if user is not OWNER
+   * @throws BadRequestException if specialCode already exists
+   */
+  async updateStore(
+    storeId: string,
+    userId: string,
+    updateStoreDto: UpdateStoreDto,
+  ): Promise<StoreResponse> {
+    // Verify store exists
+    await this.getStoreById(storeId);
+
+    // Verify user is OWNER
+    const membership = await this.prisma.membership.findUnique({
+      where: {
+        userId_storeId: {
+          userId,
+          storeId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('You must be a member of this store to update it');
+    }
+
+    if (membership.role !== Role.OWNER) {
+      throw new ForbiddenException('Only OWNER can update store information');
+    }
+
+    // Check if specialCode is being updated and if it already exists
+    if (updateStoreDto.specialCode) {
+      const existingStore = await this.prisma.store.findUnique({
+        where: { specialCode: updateStoreDto.specialCode },
+      });
+
+      if (existingStore && existingStore.id !== storeId) {
+        throw new BadRequestException('Special code already exists. Please choose a different code.');
+      }
+    }
+
+    // Update store
+    const updatedStore = await this.prisma.store.update({
+      where: { id: storeId },
+      data: {
+        ...(updateStoreDto.name && { name: updateStoreDto.name }),
+        ...(updateStoreDto.timezone && { timezone: updateStoreDto.timezone }),
+        ...(updateStoreDto.location !== undefined && { location: updateStoreDto.location }),
+        ...(updateStoreDto.specialCode && { specialCode: updateStoreDto.specialCode }),
+      },
+    });
+
+    return {
+      id: updatedStore.id,
+      name: updatedStore.name,
+      timezone: updatedStore.timezone,
+      location: updatedStore.location || undefined,
+      specialCode: updatedStore.specialCode,
+      createdAt: updatedStore.createdAt,
+      updatedAt: updatedStore.updatedAt,
     };
   }
 

@@ -119,16 +119,21 @@ NEXT_PUBLIC_API_URL="http://localhost:3000"
 
 #### Backend 환경 변수:
 ```env
-DATABASE_URL="postgresql://postgres:password@containers-us-west-xxx.railway.app:5432/railway"
+DATABASE_URL=${{Postgres.DATABASE_URL}}
 JWT_SECRET="your-production-jwt-secret"
-FRONTEND_URL="https://your-frontend.railway.app"
-PORT=3000
+FRONTEND_URL="https://soothing-fulfillment-production.up.railway.app"
 ```
+
+**중요**: `PORT` 환경 변수는 설정하지 마세요 (Railway가 자동으로 제공합니다).
 
 #### Frontend 환경 변수:
 ```env
-NEXT_PUBLIC_API_URL="https://your-backend.railway.app"
+NEXT_PUBLIC_API_URL="https://workhaja-production.up.railway.app"
 ```
+
+**도메인 정보:**
+- 백엔드: `https://workhaja-production.up.railway.app`
+- 프론트엔드: `https://soothing-fulfillment-production.up.railway.app`
 
 ### 로컬 개발 환경
 
@@ -139,6 +144,8 @@ JWT_SECRET="dev-secret-key"
 FRONTEND_URL="http://localhost:3001"
 PORT=3000
 ```
+
+**참고**: 로컬에서는 `PORT=3000`을 명시적으로 설정할 수 있습니다.
 
 #### Frontend 환경 변수:
 ```env

@@ -1,13 +1,14 @@
 import { IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
 
 /**
- * DTO for creating a new store
+ * DTO for updating a store
  */
-export class CreateStoreDto {
+export class UpdateStoreDto {
   @IsString()
   @MinLength(1, { message: 'Store name is required' })
   @MaxLength(100, { message: 'Store name must not exceed 100 characters' })
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @IsString()
   @IsOptional()
@@ -20,6 +21,7 @@ export class CreateStoreDto {
   @IsString()
   @MinLength(4, { message: 'Special code must be at least 4 characters' })
   @MaxLength(20, { message: 'Special code must not exceed 20 characters' })
-  specialCode: string;
+  @IsOptional()
+  specialCode?: string;
 }
 

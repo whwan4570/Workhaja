@@ -115,11 +115,13 @@ model User {
 }
 
 model Store {
-  id        String       @id @default(cuid())
-  name      String
-  timezone  String       @default("America/New_York")
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  id          String       @id @default(cuid())
+  name        String
+  timezone    String       @default("America/New_York")
+  location    String?
+  specialCode String       @unique
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
 
   // Labor rules
   overtimeDailyEnabled  Boolean @default(false) @map("overtime_daily_enabled")

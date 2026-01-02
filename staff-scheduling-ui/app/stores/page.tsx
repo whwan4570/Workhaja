@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge"
 import { StoreList } from "@/components/store-list"
 import { MemberTable } from "@/components/member-table"
 import { CreateStoreModal } from "@/components/modals/create-store-modal"
+import { EditStoreModal } from "@/components/modals/edit-store-modal"
 import { InviteMemberModal } from "@/components/modals/invite-member-modal"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
-import { Plus } from "lucide-react"
+import { Plus, Pencil } from "lucide-react"
 import { storesApi, membershipsApi, getAuthToken } from "@/lib/api"
 import type { Store, Member } from "@/lib/types"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -23,6 +24,7 @@ export default function StoresPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null)
   const [createStoreOpen, setCreateStoreOpen] = useState(false)
+  const [editStoreOpen, setEditStoreOpen] = useState(false)
   const [inviteMemberOpen, setInviteMemberOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
@@ -44,6 +46,8 @@ export default function StoresPage() {
         id: store.id,
         name: store.name,
         timezone: store.timezone,
+        location: store.location,
+        specialCode: store.specialCode,
         myRole: (store.role || "WORKER") as "OWNER" | "MANAGER" | "WORKER",
       }))
       setStores(formattedStores)
@@ -83,13 +87,24 @@ export default function StoresPage() {
     }
   }, [selectedStoreId])
 
-  const handleCreateStore = async (data: { name: string; timezone: string }) => {
+  const handleCreateStore = async (data: { name: string; timezone: string; location?: string; specialCode: string }) => {
     try {
       await storesApi.createStore(data)
       await loadStores()
       setCreateStoreOpen(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create store")
+    }
+  }
+
+  const handleUpdateStore = async (data: { name: string; timezone: string; location?: string; specialCode: string }) => {
+    if (!selectedStoreId) return
+    try {
+      await storesApi.updateStore(selectedStoreId, data)
+      await loadStores()
+      setEditStoreOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update store")
     }
   }
 
@@ -162,12 +177,30 @@ export default function StoresPage() {
                 <Card>
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <CardTitle>{selectedStore.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          <Badge variant="outline">{selectedStore.timezone}</Badge>
+                        <CardDescription className="mt-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{selectedStore.timezone}</Badge>
+                            {selectedStore.specialCode && (
+                              <Badge variant="secondary">Code: {selectedStore.specialCode}</Badge>
+                            )}
+                          </div>
+                          {selectedStore.location && (
+                            <p className="text-sm text-muted-foreground mt-1">{selectedStore.location}</p>
+                          )}
                         </CardDescription>
                       </div>
+                      {selectedStore.myRole === "OWNER" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditStoreOpen(true)}
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -213,6 +246,12 @@ export default function StoresPage() {
 
       {/* Modals */}
       <CreateStoreModal open={createStoreOpen} onOpenChange={setCreateStoreOpen} onSubmit={handleCreateStore} />
+      <EditStoreModal
+        open={editStoreOpen}
+        onOpenChange={setEditStoreOpen}
+        store={selectedStore || null}
+        onSubmit={handleUpdateStore}
+      />
       <InviteMemberModal open={inviteMemberOpen} onOpenChange={setInviteMemberOpen} onSubmit={handleInviteMember} />
     </div>
   )
