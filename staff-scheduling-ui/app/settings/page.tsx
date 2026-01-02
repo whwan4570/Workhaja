@@ -30,6 +30,9 @@ export default function SettingsPage() {
   const [storeId, setStoreId] = useState<string | null>(null)
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return
+    
     if (!getAuthToken()) {
       router.push("/login")
       return

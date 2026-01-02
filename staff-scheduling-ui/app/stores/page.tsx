@@ -41,13 +41,14 @@ export default function StoresPage() {
   const loadStores = async () => {
     try {
       setIsLoading(true)
+      setError("")
       const data = await storesApi.getStores()
       const formattedStores: Store[] = data.map((store) => ({
         id: store.id,
         name: store.name,
         timezone: store.timezone,
-        location: store.location,
-        specialCode: store.specialCode,
+        location: store.location || undefined,
+        specialCode: store.specialCode || 'N/A',
         myRole: (store.role || "WORKER") as "OWNER" | "MANAGER" | "WORKER",
       }))
       setStores(formattedStores)
@@ -55,8 +56,10 @@ export default function StoresPage() {
         setSelectedStoreId(formattedStores[0].id)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load stores")
-      if (err instanceof Error && err.message.includes("401")) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to load stores"
+      setError(errorMessage)
+      console.error("Failed to load stores:", err)
+      if (err instanceof Error && (err.message.includes("401") || err.message.includes("Unauthorized"))) {
         router.push("/login")
       }
     } finally {
