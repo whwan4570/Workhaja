@@ -42,4 +42,7 @@ async function bootstrap() {
   console.log(`🚀 Workhaja API is running on: http://localhost:${port}`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
