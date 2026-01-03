@@ -129,7 +129,7 @@ export default function QRCodePage() {
     }
   }
 
-  if (authLoading || !storeId || (userRole && !isManagerOrOwner)) {
+  if (authLoading || !storeId || userRole === null || (userRole !== null && !isManagerOrOwner)) {
     return (
       <div className="flex min-h-screen">
         <Sidebar />
