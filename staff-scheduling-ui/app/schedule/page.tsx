@@ -87,8 +87,14 @@ export default function SchedulePage() {
   const { storeId, isLoading: authLoading } = useAuth()
   const [viewMode, setViewMode] = useState<ViewMode>("MONTH")
   const [contentTab, setContentTab] = useState<ContentTab>("SHIFTS")
-  const [viewYear, setViewYear] = useState(new Date().getFullYear())
-  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1)
+  // Initialize with next month
+  const getNextMonth = () => {
+    const nextMonth = addMonths(new Date().getFullYear(), new Date().getMonth() + 1, 1)
+    return nextMonth
+  }
+  const nextMonth = getNextMonth()
+  const [viewYear, setViewYear] = useState(nextMonth.year)
+  const [viewMonth, setViewMonth] = useState(nextMonth.month)
   const [anchorDate, setAnchorDate] = useState<Date>(new Date()) // For WEEK view
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [shifts, setShifts] = useState<Shift[]>([])
