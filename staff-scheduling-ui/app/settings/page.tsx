@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
-import { authApi, getAuthToken, getStoreId } from "@/lib/api"
+import { authApi, getAuthToken, getStoreId, storesApi } from "@/lib/api"
 import { getLaborRules, updateLaborRules, type LaborRules } from "@/lib/settingsApi"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/hooks/useAuth"
@@ -65,14 +65,16 @@ export default function SettingsPage() {
   const loadUserRole = async () => {
     if (!storeId) return
     try {
-      const { storesApi } = await import("@/lib/api")
       const stores = await storesApi.getStores()
       const store = stores.find((s) => s.id === storeId)
-      if (store?.role) {
-        setUserRole(store.role)
+      if (store && store.role) {
+        setUserRole(store.role as "OWNER" | "MANAGER" | "WORKER")
+      } else {
+        setUserRole("WORKER")
       }
     } catch (err) {
       console.error("Failed to load user role:", err)
+      setUserRole("WORKER")
     }
   }
 
