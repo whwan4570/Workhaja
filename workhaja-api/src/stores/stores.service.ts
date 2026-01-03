@@ -307,12 +307,21 @@ export class StoresService {
       );
     }
 
+    // Prepare permissions: OWNER gets all permissions (null), MANAGER gets provided permissions, WORKER gets none (null)
+    let permissions: string[] | null = null;
+    if (role === Role.MANAGER) {
+      // For MANAGER, use provided permissions or empty array
+      permissions = createMembershipDto.permissions || [];
+    }
+    // OWNER and WORKER don't need permissions (OWNER has all, WORKER has none)
+
     // Create membership
     const membership = await this.prisma.membership.create({
       data: {
         userId: user.id,
         storeId: storeId,
         role: role,
+        permissions: permissions,
       },
       include: {
         user: {

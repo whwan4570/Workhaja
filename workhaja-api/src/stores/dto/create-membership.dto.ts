@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsArray, IsString } from 'class-validator';
 import { Role } from '@prisma/client';
 
 /**
@@ -10,5 +10,10 @@ export class CreateMembershipDto {
 
   @IsEnum(Role, { message: 'Role must be OWNER, MANAGER, or WORKER' })
   role: Role;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  permissions?: string[]; // Manager permissions (only used when role is MANAGER)
 }
 
