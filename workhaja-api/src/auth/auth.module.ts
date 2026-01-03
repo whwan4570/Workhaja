@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { StoresModule } from '../stores/stores.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 /**
  * AuthModule handles authentication using JWT tokens.
@@ -14,6 +15,7 @@ import { StoresModule } from '../stores/stores.module';
  */
 @Module({
   imports: [
+    PrismaModule,
     UsersModule,
     StoresModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
