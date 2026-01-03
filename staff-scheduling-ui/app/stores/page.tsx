@@ -111,7 +111,7 @@ export default function StoresPage() {
     }
   }
 
-  const handleInviteMember = async (data: { email: string; role: "OWNER" | "MANAGER" | "WORKER" }) => {
+  const handleInviteMember = async (data: { email: string; role: "OWNER" | "MANAGER" | "WORKER"; permissions?: string[] }) => {
     if (!selectedStoreId) return
     try {
       await membershipsApi.createMembership(selectedStoreId, data)

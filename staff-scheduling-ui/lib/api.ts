@@ -247,7 +247,7 @@ export const membershipsApi = {
   /**
    * Add a member to a store
    */
-  async createMembership(storeId: string, data: { email: string; role: 'OWNER' | 'MANAGER' | 'WORKER' }) {
+  async createMembership(storeId: string, data: { email: string; role: 'OWNER' | 'MANAGER' | 'WORKER'; permissions?: string[] }) {
     return apiRequest<{
       id: string
       userId: string
