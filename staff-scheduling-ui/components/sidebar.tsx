@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  QrCode,
 } from "lucide-react"
 import { TimeSummaryCard } from "@/components/time-summary-card"
 

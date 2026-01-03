@@ -13,6 +13,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { TimeEntriesModule } from './time-entries/time-entries.module';
+import { TotpModule } from './totp/totp.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TimeEntriesModule } from './time-entries/time-entries.module';
     NotificationsModule,
     UploadsModule,
     TimeEntriesModule,
+    TotpModule,
   ],
 })
 export class AppModule {}

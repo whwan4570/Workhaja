@@ -139,6 +139,7 @@ model Store {
   latitude    Float?       // GPS latitude for location verification
   longitude   Float?       // GPS longitude for location verification
   specialCode String       @unique
+  totpSecret  String?      @map("totp_secret") // TOTP secret for QR code check-in/out
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 

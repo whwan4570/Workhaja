@@ -11,7 +11,7 @@ import { Topbar } from "@/components/topbar"
 import { useAuth } from "@/hooks/useAuth"
 import { getStoreId } from "@/lib/api"
 import { createTimeEntry, listTimeEntries, getCurrentPosition, type TimeEntryType, type TimeEntry } from "@/lib/timeEntriesApi"
-import { Clock, MapPin, AlertCircle, CheckCircle2, XCircle, ArrowLeft } from "lucide-react"
+import { Clock, MapPin, AlertCircle, CheckCircle2, XCircle, ArrowLeft, QrCode } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import Link from "next/link"
@@ -181,25 +181,37 @@ export default function CheckInPage() {
                 )}
               </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={() => handleCheckInOut("CHECK_IN")}
-                  disabled={isLoading || isCheckedIn}
-                  className="flex-1"
-                  size="lg"
-                >
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Check In
-                </Button>
-                <Button
-                  onClick={() => handleCheckInOut("CHECK_OUT")}
-                  disabled={isLoading || isCheckedOut || !isCheckedIn}
-                  variant="outline"
-                  className="flex-1"
-                  size="lg"
-                >
-                  Check Out
-                </Button>
+              <div className="space-y-2 pt-4">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleCheckInOut("CHECK_IN")}
+                    disabled={isLoading || isCheckedIn}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Check In
+                  </Button>
+                  <Button
+                    onClick={() => handleCheckInOut("CHECK_OUT")}
+                    disabled={isLoading || isCheckedOut || !isCheckedIn}
+                    variant="outline"
+                    className="flex-1"
+                    size="lg"
+                  >
+                    Check Out
+                  </Button>
+                </div>
+                <Link href="/qrscan" className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Scan QR Code
+                  </Button>
+                </Link>
               </div>
 
               <div className="text-xs text-muted-foreground text-center pt-2 border-t">
