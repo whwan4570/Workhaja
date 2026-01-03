@@ -24,7 +24,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { getShifts, publishMonth, getMonth, createMonth, copyMonth, type Shift, type ScheduleMonth } from "@/lib/schedulingApi"
 import { listAvailability } from "@/lib/availabilityApi"
 import type { Availability } from "@/types/availability"
-import { storesApi } from "@/lib/api"
+import { storesApi, authApi } from "@/lib/api"
 import {
   getMonthRange,
   getWeekRange,
@@ -175,12 +175,24 @@ export default function SchedulePage() {
   const loadUserRole = async () => {
     if (!storeId) return
     try {
-      const membership = await storesApi.getStoreMe(storeId)
-      setUserRole(membership.role)
-      setUserId(membership.userId)
+      // Load user info to get userId
+      try {
+        const user = await authApi.getMe()
+        setUserId(user.id)
+      } catch (err) {
+        console.error("Failed to load user info:", err)
+      }
+
+      // Load user role from stores
+      const stores = await storesApi.getStores()
+      const store = stores.find((s) => s.id === storeId)
+      if (store && store.role) {
+        setUserRole(store.role as "OWNER" | "MANAGER" | "WORKER")
+      } else {
+        setUserRole("WORKER")
+      }
     } catch (err) {
       console.error("Failed to load user role:", err)
-      // Default to WORKER if can't load
       setUserRole("WORKER")
     }
   }
