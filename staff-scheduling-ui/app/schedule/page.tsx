@@ -114,6 +114,7 @@ export default function SchedulePage() {
   const [weekStartsOn, setWeekStartsOnState] = useState<number>(1)
   const [userRole, setUserRole] = useState<"OWNER" | "MANAGER" | "WORKER" | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userInfo, setUserInfo] = useState<{ id: string; email: string; name: string } | null>(null)
   const [shiftModalOpen, setShiftModalOpen] = useState(false)
   const [createMonthModalOpen, setCreateMonthModalOpen] = useState(false)
   const [publishModalOpen, setPublishModalOpen] = useState(false)
