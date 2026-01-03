@@ -121,8 +121,9 @@ export class ChangeRequestsController {
    * Requires: OWNER or MANAGER role
    */
   @Post(':requestId/approve')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('approveRequests')
   async approveRequest(
     @Param('storeId') storeId: string,
     @Param('requestId') requestId: string,

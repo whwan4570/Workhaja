@@ -68,8 +68,9 @@ export class SubmissionsController {
    * Requires: OWNER or MANAGER role
    */
   @Get('submissions')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('reviewSubmissions')
   async listSubmissions(
     @Param('storeId') storeId: string,
     @Query('type') type?: DocumentType,
