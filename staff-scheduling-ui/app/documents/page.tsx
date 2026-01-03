@@ -128,21 +128,16 @@ export default function DocumentsPage() {
   const loadUserRole = async () => {
     if (!storeId) return
     try {
-      const membership = await storesApi.getStoreMe(storeId)
-      setUserRole(membership.role)
-    } catch (err) {
-      console.error("Failed to load user role:", err)
-      try {
-        const stores = await storesApi.getStores()
-        const store = stores.find((s) => s.id === storeId)
-        if (store && "myRole" in store) {
-          setUserRole(store.myRole as "OWNER" | "MANAGER" | "WORKER")
-        } else {
-          setUserRole("WORKER")
-        }
-      } catch (e) {
+      const stores = await storesApi.getStores()
+      const store = stores.find((s) => s.id === storeId)
+      if (store && store.role) {
+        setUserRole(store.role as "OWNER" | "MANAGER" | "WORKER")
+      } else {
         setUserRole("WORKER")
       }
+    } catch (err) {
+      console.error("Failed to load user role:", err)
+      setUserRole("WORKER")
     }
   }
 

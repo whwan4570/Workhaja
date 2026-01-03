@@ -56,11 +56,11 @@ export default function QRCodePage() {
       router.replace("/stores")
       return
     }
-    if (!authLoading && !isManagerOrOwner) {
+    if (!authLoading && userRole !== null && !isManagerOrOwner) {
       router.replace("/checkin")
       return
     }
-    if (!authLoading && storeId && isManagerOrOwner) {
+    if (!authLoading && storeId && userRole !== null && isManagerOrOwner) {
       loadQRCode()
     }
   }, [storeId, userRole, authLoading, router, isManagerOrOwner])

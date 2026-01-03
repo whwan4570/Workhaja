@@ -22,7 +22,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [unreadOnly, setUnreadOnly] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<NotificationStatus | "ALL">("SENT")
+  // Removed statusFilter - backend doesn't support status filtering
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
   const [markingAllRead, setMarkingAllRead] = useState(false)
@@ -39,7 +39,7 @@ export default function NotificationsPage() {
     if (storeId && !authLoading) {
       loadNotifications(true)
     }
-  }, [storeId, authLoading, unreadOnly, statusFilter])
+  }, [storeId, authLoading, unreadOnly])
 
   const loadNotifications = async (reset: boolean = false) => {
     if (!storeId) return
@@ -54,16 +54,11 @@ export default function NotificationsPage() {
 
     try {
       const params: {
-        status?: NotificationStatus
         unread?: boolean
         limit?: number
         cursor?: string
       } = {
         limit: 20,
-      }
-
-      if (statusFilter !== "ALL") {
-        params.status = statusFilter
       }
 
       if (unreadOnly) {
@@ -206,8 +201,6 @@ export default function NotificationsPage() {
             <NotificationFilters
               unreadOnly={unreadOnly}
               onUnreadOnlyChange={setUnreadOnly}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
             />
           </div>
 

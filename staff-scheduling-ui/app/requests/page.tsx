@@ -123,22 +123,26 @@ export default function RequestsPage() {
   const loadUserRole = async () => {
     if (!storeId) return
     try {
-      const membership = await storesApi.getStoreMe(storeId)
-      setUserRole(membership.role)
-      setUserId(membership.userId)
-    } catch (err) {
-      console.error("Failed to load user role:", err)
+      // Load user info to get userId
       try {
-        const stores = await storesApi.getStores()
-        const store = stores.find((s) => s.id === storeId)
-        if (store && "myRole" in store) {
-          setUserRole(store.myRole as "OWNER" | "MANAGER" | "WORKER")
-        } else {
-          setUserRole("WORKER")
-        }
-      } catch (e) {
+        const { authApi } = await import("@/lib/api")
+        const user = await authApi.getMe()
+        setUserId(user.id)
+      } catch (err) {
+        console.error("Failed to load user info:", err)
+      }
+
+      // Load user role from stores
+      const stores = await storesApi.getStores()
+      const store = stores.find((s) => s.id === storeId)
+      if (store && store.role) {
+        setUserRole(store.role as "OWNER" | "MANAGER" | "WORKER")
+      } else {
         setUserRole("WORKER")
       }
+    } catch (err) {
+      console.error("Failed to load user role:", err)
+      setUserRole("WORKER")
     }
   }
 
