@@ -307,8 +307,8 @@ export class StoresService {
       );
     }
 
-    // Prepare permissions: OWNER gets all permissions (null), MANAGER gets provided permissions, WORKER gets none (null)
-    let permissions: string[] | null = null;
+    // Prepare permissions: OWNER gets all permissions (undefined), MANAGER gets provided permissions, WORKER gets none (undefined)
+    let permissions: string[] | undefined = undefined;
     if (role === Role.MANAGER) {
       // For MANAGER, use provided permissions or empty array
       permissions = createMembershipDto.permissions || [];
