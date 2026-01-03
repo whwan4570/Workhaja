@@ -53,6 +53,9 @@ export class StoreContextInterceptor implements NestInterceptor {
       // Inject storeId and role into request.user
       request.user.storeId = storeId;
       request.user.role = membership.role;
+      
+      // Store membership object for permission checks
+      request.membership = membership;
     }
 
     return next.handle();

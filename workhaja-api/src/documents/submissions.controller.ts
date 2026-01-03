@@ -14,7 +14,9 @@ import { SubmitSubmissionDto } from './dto/submit-submission.dto';
 import { ReviewSubmissionDto } from './dto/review-submission.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RequestUser } from '../auth/strategies/jwt.strategy';
 import { StoreContextInterceptor } from '../stores/interceptors/store-context.interceptor';
@@ -94,8 +96,9 @@ export class SubmissionsController {
    * Requires: OWNER or MANAGER role
    */
   @Post('submissions/:submissionId/approve')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('reviewSubmissions')
   async approveSubmission(
     @Param('storeId') storeId: string,
     @Param('submissionId') submissionId: string,
@@ -116,8 +119,9 @@ export class SubmissionsController {
    * Requires: OWNER or MANAGER role
    */
   @Post('submissions/:submissionId/reject')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('reviewSubmissions')
   async rejectSubmission(
     @Param('storeId') storeId: string,
     @Param('submissionId') submissionId: string,
@@ -138,8 +142,9 @@ export class SubmissionsController {
    * Requires: OWNER or MANAGER role
    */
   @Get('submissions/expiring')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('reviewSubmissions')
   async getExpiringSubmissions(
     @Param('storeId') storeId: string,
     @Query('type') type?: DocumentType,
@@ -164,8 +169,9 @@ export class SubmissionsController {
    * Requires: OWNER or MANAGER role
    */
   @Get('submissions/expired')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('reviewSubmissions')
   async getExpiredSubmissions(
     @Param('storeId') storeId: string,
     @Query('type') type?: DocumentType,

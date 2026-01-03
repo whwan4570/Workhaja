@@ -14,7 +14,9 @@ import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RequestUser } from '../auth/strategies/jwt.strategy';
 import { StoreContextInterceptor } from '../stores/interceptors/store-context.interceptor';
@@ -35,8 +37,9 @@ export class DocumentsController {
    * Requires: OWNER or MANAGER role
    */
   @Post()
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageDocuments')
   async createDocument(
     @Param('storeId') storeId: string,
     @CurrentUser() user: RequestUser,
@@ -55,8 +58,9 @@ export class DocumentsController {
    * Requires: OWNER or MANAGER role
    */
   @Put(':documentId')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageDocuments')
   async updateDocument(
     @Param('storeId') storeId: string,
     @Param('documentId') documentId: string,

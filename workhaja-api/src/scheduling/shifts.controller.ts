@@ -37,8 +37,9 @@ export class ShiftsController {
    * Requires: OWNER or MANAGER role
    */
   @Post('months/:year-:month/shifts')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageShifts')
   async createShift(
     @Param('storeId') storeId: string,
     @Param('year', ParseIntPipe) year: number,
@@ -61,8 +62,9 @@ export class ShiftsController {
    * Requires: OWNER or MANAGER role
    */
   @Put('shifts/:shiftId')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageShifts')
   async updateShift(
     @Param('storeId') storeId: string,
     @Param('shiftId') shiftId: string,
@@ -83,8 +85,9 @@ export class ShiftsController {
    * Requires: OWNER or MANAGER role
    */
   @Delete('shifts/:shiftId')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageShifts')
   async deleteShift(
     @Param('storeId') storeId: string,
     @Param('shiftId') shiftId: string,
