@@ -15,11 +15,14 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  Clock,
 } from "lucide-react"
+import { TimeSummaryCard } from "@/components/time-summary-card"
 
 const navItems = [
   { href: "/stores", label: "Stores", icon: Building2 },
   { href: "/schedule", label: "Schedule", icon: Calendar },
+  { href: "/checkin", label: "Check In/Out", icon: Clock },
   { href: "/requests", label: "Requests", icon: MessageSquare },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/reports", label: "Reports", icon: BarChart3 },
@@ -48,7 +51,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2">
+        <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -66,6 +69,9 @@ export function Sidebar() {
             )
           })}
         </nav>
+
+        {/* Time Summary Card */}
+        <TimeSummaryCard collapsed={collapsed} />
       </div>
     </aside>
   )

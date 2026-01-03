@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { MonthsService } from './months.service';
 import { CreateMonthDto } from './dto/create-month.dto';
+import { CopyMonthDto } from './dto/copy-month.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -81,5 +82,22 @@ export class MonthsController {
     @CurrentUser() user: RequestUser,
   ) {
     return this.monthsService.publishMonth(storeId, user.id, year, month);
+  }
+
+  /**
+   * Copy shifts from one month to another
+   * POST /stores/:storeId/months/copy
+   * Requires: OWNER or MANAGER role
+   */
+  @Post('copy')
+  @UseGuards(RolesGuard, PermissionsGuard)
+  @Roles(Role.OWNER, Role.MANAGER)
+  @RequirePermission('manageSchedule')
+  async copyMonth(
+    @Param('storeId') storeId: string,
+    @CurrentUser() user: RequestUser,
+    @Body() copyMonthDto: CopyMonthDto,
+  ) {
+    return this.monthsService.copyMonth(storeId, user.id, copyMonthDto);
   }
 }

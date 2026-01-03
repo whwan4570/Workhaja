@@ -15,11 +15,13 @@ import { ShiftCard } from "@/components/shift-card"
 import { AvailabilityEditor } from "@/components/availability-editor"
 import { AddShiftModal } from "@/components/modals/add-shift-modal"
 import { CreateMonthModal } from "@/components/modals/create-month-modal"
+import { CopyMonthModal } from "@/components/modals/copy-month-modal"
 import { PublishConfirmationModal } from "@/components/modals/publish-confirmation-modal"
 import { CreateRequestModal } from "@/components/modals/create-request-modal"
-import { ChevronLeft, ChevronRight, Plus, AlertCircle, RefreshCw } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, AlertCircle, RefreshCw, Clock, Copy } from "lucide-react"
+import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
-import { getShifts, publishMonth, getMonth, createMonth, type Shift, type ScheduleMonth } from "@/lib/schedulingApi"
+import { getShifts, publishMonth, getMonth, createMonth, copyMonth, type Shift, type ScheduleMonth } from "@/lib/schedulingApi"
 import { listAvailability } from "@/lib/availabilityApi"
 import type { Availability } from "@/types/availability"
 import { storesApi } from "@/lib/api"
@@ -392,6 +394,28 @@ export default function SchedulePage() {
       }
     } finally {
       setIsPublishing(false)
+    }
+  }
+
+  const handleCopyMonth = async (fromYear: number, fromMonth: number) => {
+    if (!storeId) return
+
+    setIsCopying(true)
+    try {
+      const result = await copyMonth(storeId, {
+        fromYear,
+        fromMonth,
+        toYear: viewYear,
+        toMonth: viewMonth,
+      })
+      toast.success(`Copied ${result.copied} shifts from previous month`)
+      await loadShifts()
+      setCopyMonthModalOpen(false)
+    } catch (err: any) {
+      const errorMessage = err?.message || "Failed to copy month"
+      toast.error(errorMessage)
+    } finally {
+      setIsCopying(false)
     }
   }
 
@@ -845,6 +869,15 @@ export default function SchedulePage() {
         year={viewYear}
         month={viewMonth}
         onSuccess={handleCreateMonth}
+      />
+      <CopyMonthModal
+        open={copyMonthModalOpen}
+        onOpenChange={setCopyMonthModalOpen}
+        storeId={storeId!}
+        toYear={viewYear}
+        toMonth={viewMonth}
+        onCopy={handleCopyMonth}
+        isCopying={isCopying}
       />
       <PublishConfirmationModal
         open={publishModalOpen}

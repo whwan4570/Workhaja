@@ -4,18 +4,23 @@
 
 import { apiRequest } from './api'
 
+export interface LaborRules {
+  overtimeDailyEnabled?: boolean
+  overtimeDailyMinutes?: number
+  overtimeWeeklyEnabled?: boolean
+  overtimeWeeklyMinutes?: number
+  breakPaid?: boolean
+  weekStartsOn?: number
+}
+
 /**
  * Get labor rules for a store
  * @param storeId - Store ID
- * @returns Labor rules with weekStartsOn
+ * @returns Labor rules
  */
-export async function getLaborRules(storeId: string): Promise<{
-  weekStartsOn?: number
-}> {
+export async function getLaborRules(storeId: string): Promise<LaborRules> {
   try {
-    return await apiRequest<{ weekStartsOn?: number }>(
-      `/stores/${storeId}/labor-rules`
-    )
+    return await apiRequest<LaborRules>(`/stores/${storeId}/labor-rules`)
   } catch (error: any) {
     // If endpoint doesn't exist or returns 404, return empty object
     if (
@@ -26,6 +31,22 @@ export async function getLaborRules(storeId: string): Promise<{
     }
     throw error
   }
+}
+
+/**
+ * Update labor rules for a store
+ * @param storeId - Store ID
+ * @param rules - Labor rules to update
+ * @returns Updated labor rules
+ */
+export async function updateLaborRules(
+  storeId: string,
+  rules: Partial<LaborRules>
+): Promise<LaborRules> {
+  return apiRequest<LaborRules>(`/stores/${storeId}/labor-rules`, {
+    method: 'PUT',
+    body: JSON.stringify(rules),
+  })
 }
 
 /**
@@ -59,7 +80,7 @@ export async function getWeekStartsOn(storeId: string): Promise<number> {
 }
 
 /**
- * Set weekStartsOn in localStorage (temporary until backend PUT is implemented)
+ * Set weekStartsOn (deprecated - use updateLaborRules instead)
  * @param weekStartsOn - 0 for Sunday, 1 for Monday
  */
 export function setWeekStartsOn(weekStartsOn: number): void {
@@ -69,4 +90,3 @@ export function setWeekStartsOn(weekStartsOn: number): void {
   }
   localStorage.setItem('workhaja_weekStartsOn', String(weekStartsOn))
 }
-

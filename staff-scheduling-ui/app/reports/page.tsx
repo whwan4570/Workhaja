@@ -32,7 +32,8 @@ import { storesApi } from "@/lib/api"
 import { getWeekStartsOn } from "@/lib/settingsApi"
 import { getWeekRange, formatYMD, addMonths } from "@/lib/date"
 import { toast } from "sonner"
-import { ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from "lucide-react"
+import { ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Download } from "lucide-react"
+import { downloadCSV, formatMinutesForCSV, formatDateForCSV } from "@/lib/csvExport"
 
 const monthNames = [
   "January",
@@ -288,9 +289,19 @@ export default function ReportsPage() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <Button variant="outline" size="icon" onClick={loadWeeklySummary} disabled={loadingWeekly}>
-                <RefreshCw className={`h-4 w-4 ${loadingWeekly ? "animate-spin" : ""}`} />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleExportWeeklyCSV}
+                  disabled={!weeklySummary || loadingWeekly}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button variant="outline" size="icon" onClick={loadWeeklySummary} disabled={loadingWeekly}>
+                  <RefreshCw className={`h-4 w-4 ${loadingWeekly ? "animate-spin" : ""}`} />
+                </Button>
+              </div>
             </div>
 
             {loadingWeekly ? (
@@ -393,9 +404,19 @@ export default function ReportsPage() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <Button variant="outline" size="icon" onClick={loadMonthlySummary} disabled={loadingMonthly}>
-                <RefreshCw className={`h-4 w-4 ${loadingMonthly ? "animate-spin" : ""}`} />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleExportMonthlyCSV}
+                  disabled={!monthlySummary || loadingMonthly}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button variant="outline" size="icon" onClick={loadMonthlySummary} disabled={loadingMonthly}>
+                  <RefreshCw className={`h-4 w-4 ${loadingMonthly ? "animate-spin" : ""}`} />
+                </Button>
+              </div>
             </div>
 
             {loadingMonthly ? (
@@ -464,9 +485,19 @@ export default function ReportsPage() {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button variant="outline" size="icon" onClick={loadStaffSummary} disabled={loadingStaff}>
-                  <RefreshCw className={`h-4 w-4 ${loadingStaff ? "animate-spin" : ""}`} />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleExportStaffCSV}
+                    disabled={!staffSummary || loadingStaff}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={loadStaffSummary} disabled={loadingStaff}>
+                    <RefreshCw className={`h-4 w-4 ${loadingStaff ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
               </div>
 
               {loadingStaff ? (

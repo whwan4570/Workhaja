@@ -19,6 +19,8 @@ export interface StoreResponse {
   name: string;
   timezone: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   specialCode: string;
   createdAt: Date;
   updatedAt: Date;
@@ -135,6 +137,8 @@ export class StoresService {
           name: membership.store.name,
           timezone: membership.store.timezone,
           location: (membership.store as any).location || undefined,
+          latitude: (membership.store as any).latitude || undefined,
+          longitude: (membership.store as any).longitude || undefined,
           specialCode,
           createdAt: membership.store.createdAt,
           updatedAt: membership.store.updatedAt,
@@ -167,6 +171,8 @@ export class StoresService {
       name: store.name,
       timezone: store.timezone,
       location: (store as any).location || undefined,
+      latitude: (store as any).latitude || undefined,
+      longitude: (store as any).longitude || undefined,
       specialCode: (store as any).specialCode || 'N/A',
       createdAt: store.createdAt,
       updatedAt: store.updatedAt,
@@ -227,6 +233,8 @@ export class StoresService {
         ...(updateStoreDto.name && { name: updateStoreDto.name }),
         ...(updateStoreDto.timezone && { timezone: updateStoreDto.timezone }),
         ...(updateStoreDto.location !== undefined && { location: updateStoreDto.location }),
+        ...(updateStoreDto.latitude !== undefined && { latitude: updateStoreDto.latitude }),
+        ...(updateStoreDto.longitude !== undefined && { longitude: updateStoreDto.longitude }),
         ...(updateStoreDto.specialCode && { specialCode: updateStoreDto.specialCode }),
       },
     });
@@ -237,6 +245,8 @@ export class StoresService {
       timezone: updatedStore.timezone,
       location: (updatedStore as any).location || undefined,
       specialCode: (updatedStore as any).specialCode || 'N/A',
+      latitude: (updatedStore as any).latitude || undefined,
+      longitude: (updatedStore as any).longitude || undefined,
       createdAt: updatedStore.createdAt,
       updatedAt: updatedStore.updatedAt,
     };

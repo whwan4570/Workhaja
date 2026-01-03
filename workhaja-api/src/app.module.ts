@@ -12,6 +12,7 @@ import { TimeSummaryModule } from './time-summary/time-summary.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { TimeEntriesModule } from './time-entries/time-entries.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UploadsModule } from './uploads/uploads.module';
     DocumentsModule,
     NotificationsModule,
     UploadsModule,
+    TimeEntriesModule,
   ],
 })
 export class AppModule {}

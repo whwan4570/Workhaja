@@ -7,27 +7,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
-import { authApi, getAuthToken } from "@/lib/api"
-import { getWeekStartsOn, setWeekStartsOn } from "@/lib/settingsApi"
+import { authApi, getAuthToken, getStoreId } from "@/lib/api"
+import { getLaborRules, updateLaborRules, type LaborRules } from "@/lib/settingsApi"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { getStoreId } from "@/lib/api"
+import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { storeId, userId } = useAuth()
   const [user, setUser] = useState<{
     id: string
     email: string
     name: string
   } | null>(null)
-  const [weekStartsOn, setWeekStartsOnValue] = useState<number>(1)
+  const [laborRules, setLaborRules] = useState<LaborRules>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [storeId, setStoreId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<"OWNER" | "MANAGER" | "WORKER" | null>(null)
 
   useEffect(() => {
     // Only run on client side
@@ -38,16 +41,17 @@ export default function SettingsPage() {
       return
     }
     loadUserData()
-    loadSettings()
-  }, [router])
+    if (storeId) {
+      loadSettings()
+      loadUserRole()
+    }
+  }, [router, storeId])
 
   const loadUserData = async () => {
     try {
       setIsLoading(true)
       const userData = await authApi.getMe()
       setUser(userData)
-      const currentStoreId = getStoreId()
-      setStoreId(currentStoreId)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load user data")
       if (err instanceof Error && err.message.includes("401")) {
@@ -58,39 +62,51 @@ export default function SettingsPage() {
     }
   }
 
-  const loadSettings = async () => {
+  const loadUserRole = async () => {
+    if (!storeId) return
     try {
-      const currentStoreId = getStoreId()
-      if (currentStoreId) {
-        const weekStart = await getWeekStartsOn(currentStoreId)
-        setWeekStartsOnValue(weekStart)
+      const { storesApi } = await import("@/lib/api")
+      const stores = await storesApi.getStores()
+      const store = stores.find((s) => s.id === storeId)
+      if (store?.role) {
+        setUserRole(store.role)
       }
+    } catch (err) {
+      console.error("Failed to load user role:", err)
+    }
+  }
+
+  const loadSettings = async () => {
+    if (!storeId) return
+    try {
+      const rules = await getLaborRules(storeId)
+      setLaborRules(rules)
     } catch (err) {
       console.error("Failed to load settings:", err)
     }
   }
 
-  const handleWeekStartsOnChange = async (value: string) => {
-    const newValue = Number.parseInt(value, 10)
-    setWeekStartsOnValue(newValue)
-    
+  const handleSaveLaborRules = async () => {
+    if (!storeId) return
+
     try {
       setIsSaving(true)
       setError("")
       setSuccess("")
-      
-      const currentStoreId = getStoreId()
-      if (currentStoreId) {
-        // Save to localStorage (backend PUT endpoint not implemented yet)
-        setWeekStartsOn(newValue)
-        setSuccess("Week start day saved successfully")
-      }
+
+      await updateLaborRules(storeId, laborRules)
+      toast.success("Labor rules saved successfully")
+      setSuccess("Settings saved successfully")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save settings")
+      const errorMessage = err instanceof Error ? err.message : "Failed to save settings"
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSaving(false)
     }
   }
+
+  const isOwner = userRole === "OWNER"
 
   if (isLoading) {
     return (
@@ -113,7 +129,7 @@ export default function SettingsPage() {
       <Sidebar />
       <div className="flex-1 pl-64">
         <Topbar />
-        <main className="p-6">
+        <main className="p-6 max-w-4xl">
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
@@ -135,6 +151,7 @@ export default function SettingsPage() {
             <TabsList>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="preferences">Preferences</TabsTrigger>
+              {isOwner && <TabsTrigger value="labor-rules">Labor Rules</TabsTrigger>}
             </TabsList>
 
             {/* Profile Tab */}
@@ -190,9 +207,12 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="weekStartsOn">Week Starts On</Label>
                     <Select
-                      value={weekStartsOn.toString()}
-                      onValueChange={handleWeekStartsOnChange}
-                      disabled={isSaving || !storeId}
+                      value={String(laborRules.weekStartsOn ?? 1)}
+                      onValueChange={(value) => {
+                        setLaborRules({ ...laborRules, weekStartsOn: Number.parseInt(value, 10) })
+                        handleSaveLaborRules()
+                      }}
+                      disabled={isSaving || !storeId || !isOwner}
                     >
                       <SelectTrigger id="weekStartsOn">
                         <SelectValue />
@@ -209,10 +229,133 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Labor Rules Tab (Owner only) */}
+            {isOwner && (
+              <TabsContent value="labor-rules">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Labor Rules</CardTitle>
+                    <CardDescription>
+                      Configure overtime and break rules for your store
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Daily Overtime */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label>Daily Overtime</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable daily overtime calculations
+                          </p>
+                        </div>
+                        <Switch
+                          checked={laborRules.overtimeDailyEnabled ?? false}
+                          onCheckedChange={(checked) => {
+                            setLaborRules({ ...laborRules, overtimeDailyEnabled: checked })
+                          }}
+                          disabled={isSaving}
+                        />
+                      </div>
+                      {laborRules.overtimeDailyEnabled && (
+                        <div className="space-y-2 pl-4">
+                          <Label htmlFor="overtimeDailyMinutes">Daily Overtime Threshold (minutes)</Label>
+                          <Input
+                            id="overtimeDailyMinutes"
+                            type="number"
+                            min="0"
+                            value={laborRules.overtimeDailyMinutes ?? 480}
+                            onChange={(e) => {
+                              setLaborRules({
+                                ...laborRules,
+                                overtimeDailyMinutes: Number.parseInt(e.target.value, 10) || 0,
+                              })
+                            }}
+                            disabled={isSaving}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Hours worked beyond this threshold in a day will be counted as overtime (default: 8 hours = 480 minutes)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Weekly Overtime */}
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label>Weekly Overtime</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable weekly overtime calculations
+                          </p>
+                        </div>
+                        <Switch
+                          checked={laborRules.overtimeWeeklyEnabled ?? false}
+                          onCheckedChange={(checked) => {
+                            setLaborRules({ ...laborRules, overtimeWeeklyEnabled: checked })
+                          }}
+                          disabled={isSaving}
+                        />
+                      </div>
+                      {laborRules.overtimeWeeklyEnabled && (
+                        <div className="space-y-2 pl-4">
+                          <Label htmlFor="overtimeWeeklyMinutes">Weekly Overtime Threshold (minutes)</Label>
+                          <Input
+                            id="overtimeWeeklyMinutes"
+                            type="number"
+                            min="0"
+                            value={laborRules.overtimeWeeklyMinutes ?? 2400}
+                            onChange={(e) => {
+                              setLaborRules({
+                                ...laborRules,
+                                overtimeWeeklyMinutes: Number.parseInt(e.target.value, 10) || 0,
+                              })
+                            }}
+                            disabled={isSaving}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Hours worked beyond this threshold in a week will be counted as overtime (default: 40 hours = 2400 minutes)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Break Rules */}
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label>Paid Breaks</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Breaks are paid (counted toward work hours)
+                          </p>
+                        </div>
+                        <Switch
+                          checked={laborRules.breakPaid ?? true}
+                          onCheckedChange={(checked) => {
+                            setLaborRules({ ...laborRules, breakPaid: checked })
+                          }}
+                          disabled={isSaving}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        When enabled, break time is included in total work hours. When disabled, break time is deducted from work hours.
+                      </p>
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="flex justify-end pt-4 border-t">
+                      <Button onClick={handleSaveLaborRules} disabled={isSaving || !storeId}>
+                        {isSaving ? "Saving..." : "Save Labor Rules"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
           </Tabs>
         </main>
       </div>
     </div>
   )
 }
-

@@ -72,6 +72,8 @@ enum NotificationType {
   CHANGE_REQUEST_CREATED
   CHANGE_REQUEST_UPDATED
   MONTH_PUBLISHED
+  TIME_ENTRY_APPROVED
+  TIME_ENTRY_REJECTED
 }
 
 // Notification status enum
@@ -87,6 +89,19 @@ enum NotificationChannel {
   IN_APP
   EMAIL
   PUSH
+}
+
+// Time entry type enum
+enum TimeEntryType {
+  CHECK_IN
+  CHECK_OUT
+}
+
+// Time entry status enum
+enum TimeEntryStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
 }
 
 model User {
@@ -110,6 +125,8 @@ model User {
   documentSubmissions    DocumentSubmission[]
   submissionsReviewed    DocumentSubmission[] @relation("ReviewedBy")
   notifications          Notification[]
+  timeEntries            TimeEntry[]
+  timeEntriesReviewed    TimeEntry[] @relation("ReviewedBy")
 
   @@map("users")
 }
@@ -118,7 +135,9 @@ model Store {
   id          String       @id @default(cuid())
   name        String
   timezone    String       @default("America/New_York")
-  location    String?
+  location    String?      // Address/description
+  latitude    Float?       // GPS latitude for location verification
+  longitude   Float?       // GPS longitude for location verification
   specialCode String       @unique
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
@@ -140,6 +159,7 @@ model Store {
   documents       Document[]
   submissions     DocumentSubmission[]
   notifications   Notification[]
+  timeEntries     TimeEntry[]
 
   @@map("stores")
 }
@@ -197,6 +217,7 @@ model Shift {
   month          ScheduleMonth      @relation(fields: [monthId], references: [id], onDelete: Cascade)
   user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   changeRequests ChangeRequest[]
+  timeEntries    TimeEntry[]
 
   @@index([storeId, date])
   @@index([userId, date])
@@ -383,6 +404,37 @@ model Notification {
   @@index([storeId, userId, readAt])
   @@index([status, scheduledAt])
   @@map("notifications")
+}
+
+model TimeEntry {
+  id               String          @id @default(cuid())
+  storeId          String          @map("store_id")
+  userId           String          @map("user_id")
+  shiftId          String?         @map("shift_id")
+  type             TimeEntryType
+  status           TimeEntryStatus @default(PENDING_REVIEW)
+  timestamp        DateTime        @default(now()) // Server time
+  clientTimestamp  DateTime?       @map("client_timestamp") // Client time (reference only)
+  latitude         Float?
+  longitude        Float?
+  distanceMiles    Float?          @map("distance_miles") // Calculated distance from store
+  locationVerified Boolean         @default(false) @map("location_verified")
+  reviewedById     String?         @map("reviewed_by_id")
+  reviewedAt       DateTime?       @map("reviewed_at")
+  reviewNote       String?         @map("review_note")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  store     Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shift     Shift? @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  reviewedBy User? @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([storeId, userId, createdAt])
+  @@index([storeId, status, createdAt])
+  @@index([shiftId])
+  @@index([userId, timestamp])
+  @@map("time_entries")
 }
 
 model NotificationJob {

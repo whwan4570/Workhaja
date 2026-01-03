@@ -121,6 +121,27 @@ export async function createMonth(
 }
 
 /**
+ * Copy shifts from one month to another
+ * @param storeId - Store ID
+ * @param payload - Copy month data
+ * @returns Number of shifts copied
+ */
+export async function copyMonth(
+  storeId: string,
+  payload: {
+    fromYear: number
+    fromMonth: number
+    toYear: number
+    toMonth: number
+  }
+) {
+  return apiRequest<{ copied: number }>(`/stores/${storeId}/months/copy`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+/**
  * Shift type from API
  */
 export interface Shift {

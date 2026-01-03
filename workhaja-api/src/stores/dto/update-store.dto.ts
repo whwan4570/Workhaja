@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, MaxLength, IsOptional, IsNumber, Min, Max } from 'class-validator';
 
 /**
  * DTO for updating a store
@@ -17,6 +17,18 @@ export class UpdateStoreDto {
   @IsString()
   @IsOptional()
   location?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 
   @IsString()
   @MinLength(4, { message: 'Special code must be at least 4 characters' })

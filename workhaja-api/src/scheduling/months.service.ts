@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMonthDto } from './dto/create-month.dto';
+import { CopyMonthDto } from './dto/copy-month.dto';
 import { MonthStatus, ShiftStatus } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -309,5 +310,161 @@ export class MonthsService {
         `Date ${date} does not belong to month ${year}-${month.toString().padStart(2, '0')}`,
       );
     }
+  }
+
+  /**
+   * Copy shifts from one month to another
+   * @param storeId - Store ID
+   * @param userId - User ID (must be OWNER or MANAGER)
+   * @param copyMonthDto - Copy month data
+   * @returns Number of shifts copied
+   * @throws NotFoundException if source month not found
+   * @throws ForbiddenException if user is not OWNER or MANAGER or target month is published
+   */
+  async copyMonth(
+    storeId: string,
+    userId: string,
+    copyMonthDto: CopyMonthDto,
+  ): Promise<{ copied: number }> {
+    const { fromYear, fromMonth, toYear, toMonth } = copyMonthDto;
+
+    // Verify user is a member and has OWNER or MANAGER role
+    const membership = await this.prisma.membership.findUnique({
+      where: {
+        userId_storeId: {
+          userId,
+          storeId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException(
+        'You must be a member of this store to copy months',
+      );
+    }
+
+    if (
+      membership.role !== 'OWNER' &&
+      membership.role !== 'MANAGER'
+    ) {
+      throw new ForbiddenException(
+        'Only OWNER and MANAGER can copy schedule months',
+      );
+    }
+
+    // Get source month
+    const sourceMonth = await this.prisma.scheduleMonth.findUnique({
+      where: {
+        storeId_year_month: {
+          storeId,
+          year: fromYear,
+          month: fromMonth,
+        },
+      },
+      include: {
+        shifts: {
+          where: {
+            isCanceled: false, // Only copy non-canceled shifts
+          },
+        },
+      },
+    });
+
+    if (!sourceMonth) {
+      throw new NotFoundException(
+        `Source month ${fromYear}-${fromMonth.toString().padStart(2, '0')} not found`,
+      );
+    }
+
+    // Get or create target month
+    let targetMonth = await this.prisma.scheduleMonth.findUnique({
+      where: {
+        storeId_year_month: {
+          storeId,
+          year: toYear,
+          month: toMonth,
+        },
+      },
+    });
+
+    if (!targetMonth) {
+      // Create target month if it doesn't exist
+      targetMonth = await this.prisma.scheduleMonth.create({
+        data: {
+          storeId,
+          year: toYear,
+          month: toMonth,
+          status: MonthStatus.OPEN,
+        },
+      });
+    } else {
+      // Check if target month is published
+      if (targetMonth.status === MonthStatus.PUBLISHED) {
+        throw new ForbiddenException(
+          'Cannot copy shifts to a published schedule month',
+        );
+      }
+    }
+
+    // Calculate date offset (difference in days)
+    const fromFirstDay = new Date(fromYear, fromMonth - 1, 1);
+    const toFirstDay = new Date(toYear, toMonth - 1, 1);
+    const daysOffset =
+      Math.floor((toFirstDay.getTime() - fromFirstDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Get number of days in target month
+    const toLastDay = new Date(toYear, toMonth, 0);
+    const toMonthDays = toLastDay.getDate();
+
+    // Copy shifts with date adjustment
+    let copiedCount = 0;
+    for (const sourceShift of sourceMonth.shifts) {
+      const sourceDate = new Date(sourceShift.date);
+      const sourceDay = sourceDate.getDate();
+
+      // Calculate target date
+      const targetDay = sourceDay;
+      if (targetDay > toMonthDays) {
+        // Skip if day doesn't exist in target month (e.g., Feb 30)
+        continue;
+      }
+
+      const targetDate = new Date(toYear, toMonth - 1, targetDay);
+      targetDate.setHours(0, 0, 0, 0);
+
+      // Check if user is still a member
+      const shiftUserMembership = await this.prisma.membership.findUnique({
+        where: {
+          userId_storeId: {
+            userId: sourceShift.userId,
+            storeId,
+          },
+        },
+      });
+
+      if (!shiftUserMembership) {
+        // Skip if user is no longer a member
+        continue;
+      }
+
+      // Create shift in target month
+      await this.prisma.shift.create({
+        data: {
+          storeId,
+          monthId: targetMonth.id,
+          userId: sourceShift.userId,
+          date: targetDate,
+          startTime: sourceShift.startTime,
+          endTime: sourceShift.endTime,
+          breakMins: sourceShift.breakMins,
+          status: ShiftStatus.DRAFT,
+        },
+      });
+
+      copiedCount++;
+    }
+
+    return { copied: copiedCount };
   }
 }
