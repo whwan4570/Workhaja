@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
 import { useAuth } from "@/hooks/useAuth"
 import { getQRCode, resetTotpSecret } from "@/lib/totpApi"
+import { storesApi } from "@/lib/api"
 import { RefreshCw, QrCode, AlertCircle, RotateCcw } from "lucide-react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
@@ -37,14 +38,16 @@ export default function QRCodePage() {
   const loadUserRole = async () => {
     if (!storeId) return
     try {
-      const { storesApi } = await import("@/lib/api")
       const stores = await storesApi.getStores()
       const store = stores.find((s) => s.id === storeId)
-      if (store?.role) {
-        setUserRole(store.role)
+      if (store && store.role) {
+        setUserRole(store.role as "OWNER" | "MANAGER" | "WORKER")
+      } else {
+        setUserRole("WORKER")
       }
     } catch (err) {
       console.error("Failed to load user role:", err)
+      setUserRole("WORKER")
     }
   }
 
