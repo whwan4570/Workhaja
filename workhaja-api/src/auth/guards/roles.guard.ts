@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { RequestUser } from '../auth/strategies/jwt.strategy';
+import { RequestUser } from '../strategies/jwt.strategy';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**

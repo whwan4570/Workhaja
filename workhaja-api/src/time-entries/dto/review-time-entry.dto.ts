@@ -8,7 +8,7 @@ export class ReviewTimeEntryDto {
   @IsEnum(TimeEntryStatus, {
     message: 'Status must be APPROVED or REJECTED',
   })
-  status: TimeEntryStatus.APPROVED | TimeEntryStatus.REJECTED;
+  status: TimeEntryStatus;
 
   @IsOptional()
   @IsString()
